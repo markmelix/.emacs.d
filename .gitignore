@@ -1,3 +1,4 @@
 etc/
-straight/
 var/
+straight/
+config.el
