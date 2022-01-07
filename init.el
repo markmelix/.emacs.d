@@ -10,7 +10,7 @@ Return t if it is fbound and called without error, and nil otherwise."
       t))
 
   (defun my/open-config-file ()
-	"Open the ~/.emacs.d/config.org file."
+	"Open the init.el file."
 	(interactive)
 	(find-file user-init-file))
 
@@ -48,6 +48,9 @@ Return t if it is fbound and called without error, and nil otherwise."
   (setq user-full-name "Mark Meliksetyan"
 		ser-mail-address "markmelix@gmail.com"
 
+		;; Change browser program to one from BROWSER env variable
+        browse-url-generic-program (getenv "BROWSER")
+		
 		;; Inhibit startup screens
 		inhibit-startup-screen t
 		inhibit-splash-screen  t
@@ -112,17 +115,14 @@ Return t if it is fbound and called without error, and nil otherwise."
 		;; Disable adjusting window-vscroll automatically
 		auto-window-vscroll nil
 
-		;; Set default input method to the Russian one
-		default-input-method 'russian-computer
-
 		;; Use word-wrapping for continuation lines
 		word-wrap t)
 
   ;; How far to scroll windows upward
-  (setq-default scroll-up-aggressively nil
+  (setq-default scroll-up-aggressively 0.01
 
 				;; How far to scroll windows downward
-				scroll-down-aggressively nil
+				scroll-down-aggressively 0.01
 
 				;; Column beyond which automatic line-wrapping should happen
 				fill-column my/buffer-width
@@ -133,6 +133,9 @@ Return t if it is fbound and called without error, and nil otherwise."
 
 				;; Width of a TAB character on display
 				tab-width 4
+
+				;; Set default input method to the Russian one
+				default-input-method 'russian-computer
 
 				;; Use vertical bar cursor
 				cursor-type 'bar)
@@ -165,6 +168,7 @@ Return t if it is fbound and called without error, and nil otherwise."
   ;; Enable auto-fill mode in following modes
   (add-hook 'org-mode-hook 'auto-fill-mode)
   (add-hook 'text-mode-hook 'auto-fill-mode)
+  (add-hook 'markdown-mode-hook 'auto-fill-mode)
   (add-hook 'fundamental-mode-hook 'auto-fill-mode)
 
   ;; Show matching parenthesis
@@ -313,14 +317,16 @@ Return t if it is fbound and called without error, and nil otherwise."
 
   ;; Real-time error checking in some program modes
   (use-package flycheck
-	:hook (prog-mode . flycheck-mode)
+	:hook (flycheck-mode . lsp-deferred)
 	:straight t
 	:config
 	(setq flycheck-check-syntax-automatically '(save mode-enabled)))
 
   ;; Flycheck for Rust
   (use-package flycheck-rust
+	:after rustic
 	:straight t
+	:hook rustic-mode
 	:config
 	(add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
 
@@ -339,7 +345,7 @@ Return t if it is fbound and called without error, and nil otherwise."
 
   ;; Autocompletion or snippet choose while typing code
   (use-package company
-	:after (lsp-mode yasnippet)
+	:after yasnippet
 	:straight t
 	:hook ((lsp-mode . company-mode)
 		   (prog-mode . company-mode))
@@ -353,7 +359,7 @@ Return t if it is fbound and called without error, and nil otherwise."
 	:custom
 	(company-minimum-prefix-length 1)
 	(company-idle-delay 0.0))
-
+  
   ;; Better company look
   (use-package company-box
 	:disabled
@@ -419,6 +425,17 @@ Return t if it is fbound and called without error, and nil otherwise."
   (use-package fish-mode
 	:straight t)
 
+  (use-package docker
+	:straight t
+	:bind ("C-c d" . docker))
+
+  (use-package docker-compose-mode
+	:straight t)
+
+  (use-package dockerfile-mode
+	:straight t
+	:mode "Dockerfile")
+
   ;; Highlight indent guides
   (use-package highlight-indent-guides
 	:straight t
@@ -456,13 +473,6 @@ Return t if it is fbound and called without error, and nil otherwise."
 	("C-x C-f" . helm-find-files)
 	:config
 	(helm-mode 1))
-
-  ;; The silver searcher with helm interface
-  (use-package helm-ag
-	:after helm
-	:straight t
-	:custom
-	(helm-ag-base-command "rg --color never"))
 
   ;; Projectile with helm
   (use-package helm-projectile
