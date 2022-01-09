@@ -113,10 +113,7 @@ Return t if it is fbound and called without error, and nil otherwise."
 		mouse-wheel-follow-mouse t
 
 		;; Disable adjusting window-vscroll automatically
-		auto-window-vscroll nil
-
-		;; Use word-wrapping for continuation lines
-		word-wrap t)
+		auto-window-vscroll nil)
 
   ;; How far to scroll windows upward
   (setq-default scroll-up-aggressively 0.01
@@ -133,9 +130,6 @@ Return t if it is fbound and called without error, and nil otherwise."
 
 				;; Width of a TAB character on display
 				tab-width 4
-
-				;; Set default input method to the Russian one
-				default-input-method 'russian-computer
 
 				;; Use vertical bar cursor
 				cursor-type 'bar)
@@ -171,11 +165,20 @@ Return t if it is fbound and called without error, and nil otherwise."
   (add-hook 'markdown-mode-hook 'auto-fill-mode)
   (add-hook 'fundamental-mode-hook 'auto-fill-mode)
 
+  ;; Deactivate any input method when minibuffer is launched.
+  (add-hook 'minibuffer-setup-hook 'deactivate-input-method)
+
+  ;; Set default input method after all get initialized
+  (add-hook 'after-init-hook (lambda () (setq default-input-method "russian-computer")))
+
   ;; Show matching parenthesis
   (show-paren-mode 1)
 
   ;; Close matching parenthesis
   (electric-pair-mode 1)
+
+  ;; Turn on word wrap
+  (global-visual-line-mode 1)
 
   ;; Bootstrap straight package manager
   (defvar bootstrap-version)
