@@ -28,9 +28,22 @@ Return t if it is fbound and called without error, and nil otherwise."
 	  t
 	nil))
 
+(defun my/configure-eshell ()
+  "Eshell configurations"
+  ;; Save command history when commands are entered
+  (add-hook 'eshell-pre-command-hook 'eshell-save-some-history)
+
+  ;; Truncate buffer for performance
+  (add-to-list 'eshell-output-filter-functions 'eshell-truncate-buffer)
+
+  (setq eshell-history-size 10000
+        eshell-buffer-maximum-lines 10000
+        eshell-hist-ignoredups t
+        eshell-scroll-to-bottom-on-input t))
+
 (defun my/font-setup ()
   "Setup frame font"
-  (set-frame-font "Hack Nerd Font 12" nil t))
+  (set-frame-font "Hack Nerd Font 10" t t))
 
 (define-minor-mode sensitive-mode
   "Disable all Emacs file backup features."
@@ -56,8 +69,15 @@ Return t if it is fbound and called without error, and nil otherwise."
 (setq user-full-name "Mark Meliksetyan"
 	  ser-mail-address "markmelix@gmail.com"
 
-	  ;; Change browser program to one from BROWSER env variable
-      browse-url-generic-program (getenv "BROWSER")
+	  ;; Browse urls with generic function
+	  browse-url-browser-function 'browse-url-generic
+	  
+	  ;; Change default browse-url program to chromium
+      browse-url-generic-program "chromium"
+
+	  ;; Add extra arguments when browsing with chromium
+	  ;; Don't ask whether to restore crashed pages or not
+	  browse-url-chromium-arguments '("--disable-session-crashed-bubble")
 	  
 	  ;; Inhibit startup screens
 	  inhibit-startup-screen t
@@ -171,7 +191,8 @@ Return t if it is fbound and called without error, and nil otherwise."
 (global-display-fill-column-indicator-mode 1)
 
 ;; Display line numbers
-(global-display-line-numbers-mode 1)
+(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+(add-hook 'fish-mode-hook 'display-line-numbers-mode)
 
 ;; Enable auto-fill mode in following modes
 (add-hook 'org-mode-hook 'auto-fill-mode)
@@ -183,7 +204,8 @@ Return t if it is fbound and called without error, and nil otherwise."
 (add-hook 'minibuffer-setup-hook 'deactivate-input-method)
 
 ;; Set default input method after all get initialized
-(add-hook 'after-init-hook (lambda () (setq default-input-method "russian-computer")))
+(add-hook 'after-init-hook (lambda ()
+							 (setq default-input-method "russian-computer")))
 
 ;; Show matching parenthesis
 (show-paren-mode 1)
@@ -240,48 +262,47 @@ Return t if it is fbound and called without error, and nil otherwise."
 ;; Org Mode
 (use-package org
   :straight t
+  :demand
   :after no-littering
   :bind (("C-c L" . org-store-link)
 		 ("C-c a" . org-agenda)
 		 ("C-c c" . org-capture)
 		 :map org-mode-map
 		 ("C-M-i" . completion-at-point))
-  :custom
-  (org-directory "~/Org")
-  (org-hide-leading-stars nil)
-  (org-adapt-indentation nil)
-  (org-element-use-cache nil)
-  (org-enforce-todo-dependencies t)
-  (org-enforce-todo-checkbox-dependencies t)
-  (org-startup-with-inline-images t)
-  (org-image-actual-width nil)
-  (org-hierarchical-todo-statistics nil)
-  (org-checkbox-hierarchical-statistics nil)
   :config
-  (when (display-graphic-p)
-	(setq org-latex-create-formula-image-program 'imagemagick
-		  org-preview-latex-image-directory (expand-file-name "ltximg/" no-littering-var-directory)
-		  org-latex-packages-alist '(("" "amsmath" t nil)
-									 ("" "amsthm" t nil)
-									 ("" "amssymb" t nil)
-									 ("" "mathtext" t nil)
-									 ("AUTO" "inputenc" t
-									  ("pdflatex"))
-									 ("T1,T2A" "fontenc" t
-									  ("pdflatex"))
-									 ("english,russian" "babel" t nil)
-									 ("" "tikz" t nil)
-									 ("" "pgfplots" t nil))
-		  org-format-latex-options (plist-put org-format-latex-options :scale 1.5))
-	(eval-after-load "preview"
-	  '(add-to-list 'preview-default-preamble "\\PreviewEnvironment{tikzpicture}" t)))
-  (fset 'org-apply-table-formula
-		(kmacro-lambda-form [?\C-s ?T ?B ?L ?F ?M ?: return ?\C-c ?\C-c ?\C-u ?\C- ] 0 "%d")))
+  (setq org-directory "~/Org"
+		org-hide-leading-stars nil
+		org-adapt-indentation nil
+		org-element-use-cache nil
+		org-enforce-todo-dependencies t
+		org-enforce-todo-checkbox-dependencies t
+		org-startup-with-inline-images t
+		org-image-actual-width nil
+		org-hierarchical-todo-statistics nil
+		org-checkbox-hierarchical-statistics nil
+		org-latex-create-formula-image-program 'dvisvgm
+		org-preview-latex-image-directory
+		(expand-file-name "ltximg/" no-littering-var-directory)
+		org-latex-packages-alist
+		'(("" "amsmath" t nil)
+		  ("" "amsthm" t nil)
+		  ("" "amssymb" t nil)
+		  ("" "mathtext" t nil)
+		  ("AUTO" "inputenc" t
+		   ("pdflatex"))
+		  ("T1,T2A" "fontenc" t
+		   ("pdflatex"))
+		  ("english,russian" "babel" t nil)
+		  ("" "tikz" t nil)
+		  ("" "pgfplots" t nil)))
+  (plist-put org-format-latex-options :scale 2)
+  (eval-after-load "preview"
+	'(add-to-list 'preview-default-preamble "\\PreviewEnvironment{tikzpicture}" t)))
 
 ;; Zettelkasten inside Emacs
 (use-package org-roam
   :straight t
-  :after org
+  :demand
   :bind (("C-c n l" . org-roam-buffer-toggle)
 		 ("C-c n f" . org-roam-node-find)
 		 ("C-c n i" . org-roam-node-insert)
@@ -291,7 +312,7 @@ Return t if it is fbound and called without error, and nil otherwise."
   (setq org-roam-completion-everywhere t)
   (setq org-roam-directory (file-truename "~/Braindump/Notes"))
   (setq org-roam-capture-templates
-		'(("d" "default" plain "* Метаданные\n** Источники\n   - %?\n** Ссылки\n   - \n* Данные\n"
+		'(("d" "default" plain "* Метаданные\n** Источники\n- %?\n** Ссылки\n- \n* Данные\n"
 		   :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
 							  "#+title: ${title}\n")
 		   :unnarrowed t)))
@@ -301,21 +322,19 @@ Return t if it is fbound and called without error, and nil otherwise."
 
 ;; Beautiful and customizable Zettelkasten notes graph
 (use-package org-roam-ui
-  :straight
-  (:host github :repo "org-roam/org-roam-ui" :branch "main" :files ("*.el" "out"))
+  :straight t
   :after org-roam
   :bind ("C-c n g" . org-roam-ui-mode)
   :config
   (setq org-roam-ui-sync-theme t
 		org-roam-ui-follow t
 		org-roam-ui-update-on-save t
-		org-roam-ui-open-on-start t))
+		org-roam-ui-open-on-start t
+		org-roam-ui-browser-function 'browse-url-chromium))
 
 ;; Language Server Protocol
 (use-package lsp-mode
   :straight t
-  :commands (lsp lsp-deferred)
-  :hook lsp-ui-mode
   :custom
   (lsp-rust-analyzer-cargo-watch-command "clippy")
   (lsp-pylsp-plugins-pydocstyle-enabled nil)
@@ -329,16 +348,16 @@ Return t if it is fbound and called without error, and nil otherwise."
 
 ;; Extended lsp ui features
 (use-package lsp-ui
-  :disabled
-  :if (display-graphic-p)
   :straight t
   :commands lsp-ui-mode
-  :custom
-  (lsp-ui-doc-enable nil))
+  :hook (lsp-ui-mode . lsp)
+  :bind (:map lsp-ui-mode-map
+				 ("M-j" . lsp-ui-imenu))
+  :config
+  (setq lsp-ui-doc-enable t))
 
 ;; Real-time error checking in some program modes
 (use-package flycheck
-  :hook (flycheck-mode . lsp-deferred)
   :straight t
   :config
   (setq flycheck-check-syntax-automatically '(save mode-enabled)))
@@ -347,29 +366,26 @@ Return t if it is fbound and called without error, and nil otherwise."
 (use-package flycheck-rust
   :after rustic
   :straight t
-  :hook rustic-mode
+  :hook (flycheck-mode . flycheck-rust-setup)
   :config
   (add-hook 'flycheck-mode-hook #'flycheck-rust-setup))
 
 ;; Snippets pack for yasnippet
 (use-package yasnippet-snippets
-  :straight t)
+  :straight t
+  :hook ((prog-mode text-mode) . yas/minor-mode))
 
 ;; Snippets implementation
 (use-package yasnippet
   :after yasnippet-snippets
   :straight t
-  :hook ((prog-mode . yas/minor-mode)
-		 (text-mode . yas/minor-mode))
   :config
   (yas-reload-all))
 
 ;; Autocompletion or snippet choose while typing code
 (use-package company
-  :after yasnippet
   :straight t
-  :hook ((lsp-mode . company-mode)
-		 (prog-mode . company-mode))
+  :hook ((prog-mode lsp-mode) . company-mode)
   :bind (:map company-active-map
 			  ("C-n" . next-line)
 			  ("C-p" . previous-line)
@@ -381,16 +397,10 @@ Return t if it is fbound and called without error, and nil otherwise."
   (company-minimum-prefix-length 1)
   (company-idle-delay 0.0))
 
-;; Better company look
-(use-package company-box
-  :disabled
-  :straight t
-  :hook (company-mode . company-box-mode))
-
 ;; Debugging features
 (use-package dap-mode
   :straight t
-  :hook (python-mode . dap-mode)
+  :hook (python-mode rustic-mode)
   :custom
   (lsp-enable-dap-auto-configure nil)
   (dap-default-terminal-kind "external") ; may be external/integrated
@@ -412,12 +422,26 @@ Return t if it is fbound and called without error, and nil otherwise."
 
 ;; Rust language support
 (use-package rustic
-  :straight t)
+  :straight t
+  :hook (rustic-mode . lsp)
+  :config
+  (require 'dap-lldb)
+  (require 'dap-gdb-lldb)
+  ;; installs .extension/vscode
+  (dap-gdb-lldb-setup)
+  (dap-register-debug-template
+   "Rust::LLDB Run Configuration"
+   (list :type "lldb"
+         :request "launch"
+         :name "LLDB::Run"
+		 :gdbpath "rust-lldb"
+         :target nil
+         :cwd nil)))
 
 ;; Python language support
 (use-package python-mode
   :straight t
-  ;:hook (python-mode . lsp-deferred)
+  :hook (python-mode . lsp)
   :custom
   (dap-python-executable "python")
   (dap-python-debugger 'debugpy)
@@ -486,22 +510,10 @@ Return t if it is fbound and called without error, and nil otherwise."
   :straight t)
 
 ;; Framework for incremental completions and narrowing selections
-(use-package helm
-  :demand t
-  :straight t
-  :custom (helm-M-x-fuzzy-match t)
-  :bind ("M-x"     . helm-M-x)
-  ("C-x r b" . helm-filtered-bookmarks)
-  ("C-x C-f" . helm-find-files)
-  :config
-  (helm-mode 1))
-
-;; Projectile with helm
-(use-package helm-projectile
-  :after (helm projectile)
+(use-package selectrum
   :straight t
   :config
-  (helm-projectile-on))
+  (selectrum-mode 1))
 
 ;; Subtrees in dired
 (use-package dired-subtree
@@ -517,35 +529,42 @@ Return t if it is fbound and called without error, and nil otherwise."
 (use-package dired-open
   :straight t)
 
-;; Preview latex in org files automatically
-(use-package org-fragtog
-  :if (display-graphic-p)
-  :after org
-  :straight t
-  :hook ((org-mode . org-fragtog-mode)
-		 (org-mode . (lambda () (org-latex-preview '(16))))))
-
-;; Solarized Theme
-(use-package solarized-theme
-  :if (display-graphic-p)
-  :straight t
-  :init
-  (setq solarized-use-variable-pitch nil
-		solarized-scale-org-headlines nil)
-  :config
-  (load-theme 'solarized-dark t))
+;; Emacs shell and terminal emulator
+(use-package eshell
+  :bind ("C-C o" . eshell)
+  :hook (eshell-first-time-mode . my/configure-eshell))
 
 (defun my/frame-setup ()
+  "Set every settings related to graphics up"
   (my/font-setup)
-  (setq solarized-use-variable-pitch nil
-		solarized-scale-org-headlines nil)
-  (load-theme 'solarized-dark t))
+
+  ;; Solarized Theme
+  (use-package solarized-theme
+	:straight t
+	:init
+	(setq solarized-use-variable-pitch nil
+		  solarized-scale-org-headlines nil)
+	:config
+	(load-theme 'solarized-dark t))
+
+  ;; Preview latex in org files automatically
+  (use-package org-fragtog
+	:demand
+	:straight t
+	:hook ((org-mode . org-fragtog-mode)
+		   (org-mode . (lambda () (org-latex-preview '(16))))))
+
+  ;; Better company look
+  (use-package company-box
+	:straight t
+	:hook (company-mode . company-box-mode)
+	:config
+	(setq-default company-box-doc-enable nil)))
 
 (if (daemonp)
 	(add-hook 'after-make-frame-functions
 			  (lambda (frame)
 				(with-selected-frame frame
-				  (my/font-setup)
 				  (my/frame-setup))))
   (my/frame-setup))
 
@@ -558,16 +577,7 @@ Return t if it is fbound and called without error, and nil otherwise."
 	   (set-default-coding-systems 'utf-8)
 	   (set-terminal-coding-system 'utf-8)
 	   (set-keyboard-coding-system 'utf-8)
-	   (prefer-coding-system       'utf-8)
-
-	   (use-package vterm
-		 :straight t))
+	   (prefer-coding-system       'utf-8))
 	  ((eq system-type 'windows-nt)
 	   ;; Windows-specific configurations
-	   ))
-(cond ((display-graphic-p)
-	   ;; Graphical configurations
-	   (my/font-setup))
-	  (t
-	   ;; Console-specific configurations
 	   ))
