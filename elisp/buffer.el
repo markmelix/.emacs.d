@@ -81,7 +81,10 @@
 (global-visual-line-mode 1)
 
 ;; Highlight indent guides
-(use-package highlight-indent-guides
-  :straight t
-  :custom (highlight-indent-guides-method 'character)
-  :hook ((prog-mode org-mode html-mode-hook) . highlight-indent-guides-mode))
+(straight-use-package 'highlight-indent-guides)
+
+(setq highlight-indent-guides-method 'character)
+
+(add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
+(add-hook 'org-mode-hook 'highlight-indent-guides-mode)
+(add-hook 'html-mode-hook 'highlight-indent-guides-mode)

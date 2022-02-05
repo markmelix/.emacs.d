@@ -13,7 +13,6 @@
 		eshell-hist-ignoredups t
 		eshell-scroll-to-bottom-on-input t))
 
-;; Emacs shell and terminal emulator
-(use-package eshell
-  :bind ("C-C C-o" . eshell)
-  :hook (eshell-first-time-mode . my/configure-eshell))
+(add-hook 'eshell-first-time-mode 'my/configure-eshell)
+
+(keymap-global-set "C-c C-o" 'eshell)

@@ -1,3 +1,2 @@
 ;; Rust language support
-(use-package rustic
-  :straight t)
+(straight-use-package 'rustic)

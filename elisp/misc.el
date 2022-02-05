@@ -26,13 +26,6 @@
  				(with-selected-frame frame (my/font-setup)))))
 
 ;; Display available keybindings in popup
-(use-package which-key
-  :straight t
-  :init (which-key-mode)
-  :diminish which-key-mode
-  :config
-  (setq which-key-idle-delay 1))
-
-;; More convenient method for binding keys
-(use-package general
-  :straight t)
+(straight-use-package 'which-key)
+(setq which-key-idle-delay 1)
+(which-key-mode)

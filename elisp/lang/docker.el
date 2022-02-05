@@ -1,12 +1,7 @@
 ;;;; Docker support
 
-(use-package docker
-  :straight t
-  :bind ("C-c d" . docker))
+(straight-use-package 'docker)
+(keymap-global-set "C-c d" 'docker)
 
-(use-package docker-compose-mode
-  :straight t)
-
-(use-package dockerfile-mode
-  :straight t
-  :mode "Dockerfile")
+(straight-use-package 'dockerfile-mode)
+(straight-use-package 'docker-compose-mode)

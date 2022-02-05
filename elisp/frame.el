@@ -16,16 +16,11 @@
 (call-if-fbound 'scroll-bar-mode -1)
 
 ;; Solarized Theme
-(use-package solarized-theme
-  :straight t
-  :init
-  (setq solarized-use-variable-pitch nil
-		solarized-scale-org-headlines nil)
-  :config
-  (load-theme 'solarized-dark t))
+(straight-use-package 'solarized-theme)
+(setq solarized-use-variable-pitch nil
+	  solarized-scale-org-headlines nil)
+(load-theme 'solarized-dark t)
 
 ;; Convenient mode line
-(use-package telephone-line
-  :straight t
-  :config
-  (telephone-line-mode 1))
+(straight-use-package 'telephone-line)
+(telephone-line-mode 1)

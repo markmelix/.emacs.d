@@ -1,3 +1,2 @@
 ;; CMake support
-(use-package cmake-mode
-  :straight t)
+(straight-use-package 'cmake-mode)

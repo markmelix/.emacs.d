@@ -18,6 +18,9 @@
  ring-bell-function 'ignore
  )
 
+(defun display-startup-echo-area-message ()
+  (message "Let the hacking begin!"))
+
 ;;; Package management
 ;; Bootstrap straight package manager
 (defvar bootstrap-version)
@@ -35,20 +38,14 @@
 	  (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
-;; Install use-package
-(straight-use-package 'use-package)
-
-;; Keep .emacs.d clean
-(use-package no-littering
-  :straight t
-  :custom
-  (auto-save-file-name-transforms
-   `((".*" ,(no-littering-expand-var-file-name "auto-save/") t)))
-  (custom-file (no-littering-expand-etc-file-name "custom.el"))
-  :config
-  (unless (file-exists-p custom-file)
-	(write-region "" nil custom-file))
-  (load custom-file))
+;;; Keep .emacs.d clean
+(straight-use-package 'no-littering)
+(setq auto-save-file-name-transforms
+	  `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))
+	  custom-file (no-littering-expand-etc-file-name "custom.el"))
+(unless (file-exists-p custom-file)
+  (write-region "" nil custom-file))
+(load custom-file)
 
 ;;; Path setup
 (when (eq system-type "gnu/linux")
