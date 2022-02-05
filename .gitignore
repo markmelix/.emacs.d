@@ -3,3 +3,4 @@ var/
 straight/
 config.el
 org-roam.db
+eln-cache/

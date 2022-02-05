@@ -247,6 +247,12 @@ Return t if it is fbound and called without error, and nil otherwise."
 	(write-region "" nil custom-file))
   (load custom-file))
 
+;; Convenient mode line
+(use-package telephone-line
+  :straight t
+  :config
+  (telephone-line-mode 1))
+
 ;; Display available keybindings in popup
 (use-package which-key
   :straight t
@@ -335,14 +341,17 @@ Return t if it is fbound and called without error, and nil otherwise."
 ;; Language Server Protocol
 (use-package lsp-mode
   :straight t
-  :custom
-  (lsp-rust-analyzer-cargo-watch-command "clippy")
-  (lsp-pylsp-plugins-pydocstyle-enabled nil)
-  (lsp-signature-auto-activate nil)
-  (lsp-keymap-prefix "C-c l")
-  (lsp-idle-delay 0.500)
-  (lsp-use-plists t)
+  :hook (((python-mode rustic-mode) . lsp-deferred)
+		 (lsp-mode . lsp-enable-which-key-integration))
+  :commands lsp
   :config
+  (setq lsp-rust-analyzer-cargo-watch-command "clippy"
+		lsp-pylsp-plugins-pydocstyle-enabled nil
+		lsp-signature-auto-activate nil
+		lsp-keymap-prefix "C-c l"
+		lsp-idle-delay 0.1
+		lsp-use-plists t
+		lsp-log-io nil)
   (global-eldoc-mode -1)
   (lsp-enable-which-key-integration t))
 
@@ -350,11 +359,59 @@ Return t if it is fbound and called without error, and nil otherwise."
 (use-package lsp-ui
   :straight t
   :commands lsp-ui-mode
-  :hook (lsp-ui-mode . lsp)
+  :hook (lsp-mode . lsp-ui-mode)
   :bind (:map lsp-ui-mode-map
-				 ("M-j" . lsp-ui-imenu))
+				 ("M-j" . lsp-ui-imenu)))
+
+;; Debugging features
+(use-package dap-mode
+  :disabled
+  :straight t
+  :hook (python-mode rustic-mode)
   :config
-  (setq lsp-ui-doc-enable t))
+  (setq lsp-enable-dap-auto-configure nil
+		dap-default-terminal-kind "external"
+		dap-external-terminal '("alacritty" "-t" "{display}" "-e" "sh" "-c" "{command}")
+		dap-python-executable "python"
+		dap-python-debugger 'debugpy)
+  
+  (require 'dap-python)
+  (require 'dap-lldb)
+  (require 'dap-gdb-lldb)
+  (dap-gdb-lldb-setup)
+
+  (dap-register-debug-template
+   "Rust::LLDB Run Configuration"
+   (list :type "lldb"
+         :request "launch"
+         :name "LLDB::Run"
+		 :gdbpath "rust-lldb"
+         :target nil
+         :cwd nil))
+  
+  (dap-register-debug-template
+   "Python :: Debug"
+   (list :type "python"
+		 :console "externalTerminal"
+		 :args ""
+		 :cwd nil
+		 :program nil
+		 :request "launch"
+		 :name "Python :: Debug"))
+
+  ;; Set up Node debugging
+  (require 'dap-node)
+  (dap-node-setup) ;; Automatically installs Node debug adapter if needed
+  (general-define-key
+   :keymaps 'lsp-mode-map
+   :prefix lsp-keymap-prefix
+   "d" '(dap-hydra t :wk "debugger"))
+
+  (dap-mode 1)
+  (dap-ui-mode 1)
+  (dap-tooltip-mode 0)
+  (tooltip-mode 0)
+  (dap-ui-controls-mode 1))
 
 ;; Real-time error checking in some program modes
 (use-package flycheck
@@ -372,20 +429,20 @@ Return t if it is fbound and called without error, and nil otherwise."
 
 ;; Snippets pack for yasnippet
 (use-package yasnippet-snippets
-  :straight t
-  :hook ((prog-mode text-mode) . yas/minor-mode))
+  :straight t)
 
 ;; Snippets implementation
 (use-package yasnippet
   :after yasnippet-snippets
   :straight t
+  :hook (prog-mode . yas/minor-mode)
   :config
   (yas-reload-all))
 
 ;; Autocompletion or snippet choose while typing code
 (use-package company
   :straight t
-  :hook ((prog-mode lsp-mode) . company-mode)
+  :hook (prog-mode . company-mode)
   :bind (:map company-active-map
 			  ("C-n" . next-line)
 			  ("C-p" . previous-line)
@@ -397,71 +454,13 @@ Return t if it is fbound and called without error, and nil otherwise."
   (company-minimum-prefix-length 1)
   (company-idle-delay 0.0))
 
-;; Debugging features
-(use-package dap-mode
-  :straight t
-  :hook (python-mode rustic-mode)
-  :custom
-  (lsp-enable-dap-auto-configure nil)
-  (dap-default-terminal-kind "external") ; may be external/integrated
-  (dap-external-terminal '("alacritty" "-t" "{display}" "-e" "sh" "-c" "{command}"))
-  :config
-  (dap-mode 1)
-  (dap-ui-mode 1)
-  (dap-tooltip-mode 0)
-  (tooltip-mode 0)
-  (dap-ui-controls-mode 1)
-
-  ;; Set up Node debugging
-  (require 'dap-node)
-  (dap-node-setup) ;; Automatically installs Node debug adapter if needed
-  (general-define-key
-   :keymaps 'lsp-mode-map
-   :prefix lsp-keymap-prefix
-   "d" '(dap-hydra t :wk "debugger")))
-
 ;; Rust language support
 (use-package rustic
-  :straight t
-  :hook (rustic-mode . lsp)
-  :config
-  (require 'dap-lldb)
-  (require 'dap-gdb-lldb)
-  ;; installs .extension/vscode
-  (dap-gdb-lldb-setup)
-  (dap-register-debug-template
-   "Rust::LLDB Run Configuration"
-   (list :type "lldb"
-         :request "launch"
-         :name "LLDB::Run"
-		 :gdbpath "rust-lldb"
-         :target nil
-         :cwd nil)))
+  :straight t)
 
 ;; Python language support
 (use-package python-mode
-  :straight t
-  :hook (python-mode . lsp)
-  :custom
-  (dap-python-executable "python")
-  (dap-python-debugger 'debugpy)
-  :config
-  (require 'dap-python)
-  (dap-register-debug-template
-   "Python :: Debug"
-   (list :type "python"
-		 :console "externalTerminal"
-		 :args ""
-		 :cwd nil
-		 :program nil
-		 :request "launch"
-		 :name "Python :: Debug")))
-
-;; Python enviroments managing
-(use-package pyvenv
-  :disabled
-  :straight t
-  :hook (python-mode . pyenv-mode))
+  :straight t)
 
 ;; CMake support
 (use-package cmake-mode
@@ -486,15 +485,7 @@ Return t if it is fbound and called without error, and nil otherwise."
 (use-package highlight-indent-guides
   :straight t
   :custom (highlight-indent-guides-method 'character)
-  :hook ((prog-mode . highlight-indent-guides-mode)
-		 (org-mode . highlight-indent-guides-mode)
-		 (html-mode-hook . highlight-indent-guides-mode)))
-
-;; Convenient mode line
-(use-package telephone-line
-  :straight t
-  :config
-  (telephone-line-mode 1))
+  :hook ((prog-mode org-mode html-mode-hook) . highlight-indent-guides-mode))
 
 ;; Project management
 (use-package projectile
@@ -510,10 +501,25 @@ Return t if it is fbound and called without error, and nil otherwise."
   :straight t)
 
 ;; Framework for incremental completions and narrowing selections
-(use-package selectrum
+(use-package helm
+  :demand t
+  :straight t
+  :bind (("M-x"     . helm-M-x)
+		 ("C-x r b" . helm-filtered-bookmarks)
+		 ("C-x C-f" . helm-find-files)
+		 ("C-x b"   . helm-mini))
+  :config
+  (setq helm-M-x-fuzzy-match t
+		helm-buffers-fuzzy-matching t
+		helm-recentf-fuzzy-match t)
+  (helm-mode 1))
+
+;; Projectile with helm
+(use-package helm-projectile
+  :after (helm projectile)
   :straight t
   :config
-  (selectrum-mode 1))
+  (helm-projectile-on))
 
 ;; Subtrees in dired
 (use-package dired-subtree
@@ -531,42 +537,32 @@ Return t if it is fbound and called without error, and nil otherwise."
 
 ;; Emacs shell and terminal emulator
 (use-package eshell
-  :bind ("C-C o" . eshell)
+  :bind ("C-C C-o" . eshell)
   :hook (eshell-first-time-mode . my/configure-eshell))
 
-(defun my/frame-setup ()
-  "Set every settings related to graphics up"
-  (my/font-setup)
+;; Solarized Theme
+(use-package solarized-theme
+  :straight t
+  :init
+  (setq solarized-use-variable-pitch nil
+		solarized-scale-org-headlines nil)
+  :config
+  (load-theme 'solarized-dark t))
 
-  ;; Solarized Theme
-  (use-package solarized-theme
-	:straight t
-	:init
-	(setq solarized-use-variable-pitch nil
-		  solarized-scale-org-headlines nil)
-	:config
-	(load-theme 'solarized-dark t))
+;; Preview latex in org files automatically
+(use-package org-fragtog
+  :demand
+  :straight t
+  :hook ((org-mode . org-fragtog-mode)
+		 (org-mode . (lambda () (org-latex-preview '(16))))))
 
-  ;; Preview latex in org files automatically
-  (use-package org-fragtog
-	:demand
-	:straight t
-	:hook ((org-mode . org-fragtog-mode)
-		   (org-mode . (lambda () (org-latex-preview '(16))))))
-
-  ;; Better company look
-  (use-package company-box
-	:straight t
-	:hook (company-mode . company-box-mode)
-	:config
-	(setq-default company-box-doc-enable nil)))
+(my/font-setup)
 
 (if (daemonp)
-	(add-hook 'after-make-frame-functions
-			  (lambda (frame)
-				(with-selected-frame frame
-				  (my/frame-setup))))
-  (my/frame-setup))
+ 	(add-hook 'after-make-frame-functions
+ 			  (lambda (frame)
+ 				(with-selected-frame frame (my/font-setup)))))
+
 
 (cond ((eq system-type 'gnu/linux)
 	   ;; GNU/Linux-specific configurations
