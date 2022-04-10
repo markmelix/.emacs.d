@@ -1,38 +1,27 @@
 ;;; File backup configuration
 
-(setq
- ;; Backup of a file the first time it is saved.
- make-backup-files t
+(custom-set-variables
+ '(make-backup-files t "Backup of a file the first time it is saved")
 
- ;; Don't clobber symlinks
- backup-by-copying t
+ '(backup-by-copying t "Don't clobber symlinks")
 
- ;; Version numbers for backup files
- version-control t
+ '(version-control t "Version numbers for backup files")
 
- ;; Delete excess backup files silently
- delete-old-versions t
+ '(delete-old-versions t "Delete excess backup files silently")
 
- ;; Use system trash can
- delete-by-moving-to-trash t
+ '(delete-by-moving-to-trash t "Use system trash can")
 
- ;; Oldest versions to keep when a new numbered backup is made
- kept-old-versions 6
+ '(kept-old-versions 6 "Oldest versions to keep when a new numbered backup is made")
 
- ;; Newest versions to keep when a new numbered backup is made
- kept-new-versions 9
+ '(kept-new-versions 9 "Newest versions to keep when a new numbered backup is made")
 
- ;; Auto-save every buffer that visits a file
- auto-save-default t
+ '(auto-save-default t "Auto-save every buffer that visits a file")
 
- ;; Number of seconds idle time before auto-save
- auto-save-timeout 20
+ '(auto-save-timeout 20 "Number of seconds idle time before auto-save")
 
- ;; Number of keystrokes between auto-saves
- auto-save-interval 200
+ '(auto-save-interval 200 "Number of keystrokes between auto-saves")
 
- ;; Don't create lockfiles
- create-lockfiles nil
+ '(create-lockfiles nil "Don't create lockfiles")
  )
 
 (define-minor-mode sensitive-mode

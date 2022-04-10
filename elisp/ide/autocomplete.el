@@ -1,18 +1,19 @@
 ;;;; Autocompletion features
 
-;; Snippets pack for yasnippet
-(straight-use-package 'yasnippet-snippets)
-
 ;; Snippets implementation
 (straight-use-package 'yasnippet)
 (require 'yasnippet)
+(yas-global-mode 1)
 
-(add-hook 'prog-mode-hook 'yas/minor-mode)
-
-(yas-reload-all)
+;; Snippets pack for yasnippet
+(straight-use-package 'yasnippet-snippets)
 
 ;; Autocompletion or snippet choose while typing code
 (straight-use-package 'company)
+
+(setq company-minimum-prefix-length 1)
+(setq company-idle-delay 0.01)
+
 (require 'company)
 
 (add-hook 'prog-mode-hook 'company-mode)
@@ -24,5 +25,12 @@
 (keymap-set company-active-map "M-<" 'company-select-first)
 (keymap-set company-active-map "M->" 'company-select-last)
 
-(setq company-minimum-prefix-length 1)
-(setq company-idle-delay 0.0)
+;; Icons and docs in completion
+(straight-use-package 'company-box)
+(require 'company-box)
+(add-hook 'company-mode-hook 'company-box-mode)
+
+;;; Better sorting for company completion suggestions
+(straight-use-package 'company-prescient)
+(company-prescient-mode 1)
+(prescient-persist-mode)

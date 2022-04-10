@@ -12,11 +12,13 @@
 ;;; Fish shell language support
 (straight-use-package 'fish-mode)
 
-;;; Python language support
-(straight-use-package 'python-mode)
-
 ;;; Rust language support
+;(straight-use-package 'rust-mode)
 (straight-use-package 'rustic)
+(require 'rustic)
 
 ;;; Toml support
 (straight-use-package 'toml-mode)
+
+;;; Markdown support
+(straight-use-package 'markdown-mode)

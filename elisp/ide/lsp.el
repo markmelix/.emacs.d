@@ -3,22 +3,23 @@
 (straight-use-package 'lsp-mode)
 (require 'lsp)
 
-(add-hook 'pyton-mode-hook 'lsp-deferred)
-(add-hook 'rustic-mode-hook 'lsp-deferred)
-
 (setq lsp-rust-analyzer-cargo-watch-command "clippy"
-	  lsp-pylsp-plugins-pydocstyle-enabled nil
-	  lsp-signature-auto-activate nil
-	  lsp-keymap-prefix "C-c l"
-	  lsp-idle-delay 0.1
-	  lsp-use-plists t
-	  lsp-log-io nil)
+	  lsp-rust-analyzer-completion-postfix-enable nil
+ 	  lsp-keymap-prefix "C-c l"
+ 	  lsp-use-plists t
+	  lsp-idle-delay 0.5
+	  lsp-modeline-diagnostics-scope: :file
+	  lsp-diagnostics-provider :none
+ 	  rustic-lsp-client 'lsp-mode
+ 	  rustic-lsp-server 'rust-analyzer)
 
-(global-eldoc-mode -1)
+(keymap-set lsp-mode-map "C-c l" lsp-command-map)
+(keymap-set lsp-command-map "s" 'lsp-treemacs-symbols)
+
 (lsp-enable-which-key-integration t)
 
-;; Extended lsp ui features
-(straight-use-package 'lsp-ui)
-(require 'lsp-ui)
-(add-hook 'lsp-mode-hook 'lsp-ui-mode)
-(keymap-set lsp-ui-mode-map "M-j" 'lsp-ui-imenu)
+(cl-defgeneric lsp-clients-extract-signature-on-hover (contents _server-id)
+  "Extract a representative line from CONTENTS, to show in the echo area."
+  (nth 1 (s-split "\n\n" (lsp--render-element contents))))
+
+

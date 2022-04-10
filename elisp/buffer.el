@@ -88,3 +88,11 @@
 (add-hook 'prog-mode-hook 'highlight-indent-guides-mode)
 (add-hook 'org-mode-hook 'highlight-indent-guides-mode)
 (add-hook 'html-mode-hook 'highlight-indent-guides-mode)
+
+;;; Make some buffers not to be displayed while using prev-buffer or next-buffer
+;;; functions.
+(defun my-buffer-predicate (buffer)
+  (if (string-match "helm" (buffer-name buffer))
+      nil
+    t))
+(set-frame-parameter nil 'buffer-predicate 'my-buffer-predicate)

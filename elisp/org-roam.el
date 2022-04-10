@@ -11,7 +11,7 @@
 
 (setq
  org-roam-completion-everywhere t
- org-roam-directory (file-truename "~/Braindump/Notes")
+ org-roam-directory (file-truename "~/braindump/notes")
  org-roam-v2-ack t)
 
 (setq org-roam-capture-templates

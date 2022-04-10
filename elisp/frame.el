@@ -1,8 +1,14 @@
 ;;;; Frame and UI settings
 
 (defun my/font-setup ()
-  "Setup frame font"
-  (set-frame-font "Hack Nerd Font 10" t t))
+  "Setup fonts"
+  (set-frame-font "Hack Nerd Font 10" t t)
+
+  ;; Emoji: 😄, 🤦, 🏴󠁧󠁢󠁳󠁣󠁴󠁿
+  (set-fontset-font t 'symbol "Apple Color Emoji")
+  (set-fontset-font t 'symbol "Noto Color Emoji" nil 'append)
+  (set-fontset-font t 'symbol "Segoe UI Emoji" nil 'append)
+  (set-fontset-font t 'symbol "Symbola" nil 'append))
 
 (my/font-setup)
 
