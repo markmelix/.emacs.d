@@ -42,6 +42,11 @@
   '(add-to-list 'preview-default-preamble
 				"\\PreviewEnvironment{tikzpicture}" t))
 
+;;; Shows org-mode bullets as pretty UTF-8 characters
+(straight-use-package 'org-bullets)
+(require 'org-bullets)
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+
 ;; Preview latex in org files automatically
 (straight-use-package 'org-fragtog)
 (add-hook 'org-mode-hook 'org-fragtog-mode)
