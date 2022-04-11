@@ -33,10 +33,11 @@
  "Rust::LLDB Run Configuration"
  (list :type "lldb"
        :request "launch"
-	   :name "LLDB::Run"
+       :name "LLDB::Run"
 	   :gdbpath "rust-lldb"
-	   :target nil
-       :cwd nil))
+       ;; uncomment if lldb-mi is not in PATH
+       ;; :lldbmipath "path/to/lldb-mi"
+       ))
 
 (dap-register-debug-template
  "Python :: Debug"
