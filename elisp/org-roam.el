@@ -9,25 +9,25 @@
 (keymap-global-set "C-c n c" 'org-roam-capture)
 (keymap-global-set "C-c n j" 'org-roam-dailies-capture-today)
 
-(setq
- org-roam-completion-everywhere t
- org-roam-directory (file-truename "~/braindump/notes")
- org-roam-v2-ack t)
+(custom-set-variables
+ '(org-roam-completion-everywhere t)
+ '(org-roam-directory (file-truename "~/braindump/notes"))
+ '(org-roam-v2-ack t))
 
-(setq org-roam-capture-templates
+(custom-set-variables '(org-roam-capture-templates
 	  '(("d" "default" plain
 		 "* Метаданные\n** Источники\n- %?\n** Ссылки\n- \n* Данные\n"
 		 :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
 							"#+title: ${title}\n")
-		 :unnarrowed t)))
+		 :unnarrowed t))))
 
 (org-roam-db-autosync-mode)
 
 ;; Beautiful and customizable Zettelkasten notes graph
 (straight-use-package 'org-roam-ui)
 (keymap-global-set "C-c n g" org-roam-ui-mode)
-(setq org-roam-ui-sync-theme t
-	  org-roam-ui-follow t
-	  org-roam-ui-update-on-save t
-	  org-roam-ui-open-on-start t
-	  org-roam-ui-browser-function 'browse-url-chromium)
+(custom-set-variables '(org-roam-ui-sync-theme t)
+	  '(org-roam-ui-follow t)
+	  '(org-roam-ui-update-on-save t)
+	  '(org-roam-ui-open-on-start t)
+	  '(org-roam-ui-browser-function 'browse-url-chromium))

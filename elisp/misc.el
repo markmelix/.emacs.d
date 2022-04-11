@@ -1,16 +1,21 @@
 ;;; Other miscellaneous settings
 
+;; A utility package to collect various Icon Fonts and propertize them
+(when (display-graphic-p)
+  (straight-use-package 'all-the-icons)
+  (require 'all-the-icons))
+
 ;; Url browsing
-(setq
+(custom-set-variables
  ;; Browse urls with generic function
- browse-url-browser-function 'browse-url-generic
+ '(browse-url-browser-function 'browse-url-generic)
  
  ;; Change default browse-url program to chromium
- browse-url-generic-program "chromium"
+ '(browse-url-generic-program "chromium")
 
  ;; Add extra arguments when browsing with chromium
  ;; Don't ask whether to restore crashed pages or not
- browse-url-chromium-arguments '("--disable-session-crashed-bubble")
+ '(browse-url-chromium-arguments '("--disable-session-crashed-bubble"))
  )
 
 (setq-default
@@ -27,5 +32,5 @@
 
 ;; Display available keybindings in popup
 (straight-use-package 'which-key)
-(setq which-key-idle-delay 1)
+(custom-set-variables '(which-key-idle-delay 1))
 (which-key-mode)

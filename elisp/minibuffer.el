@@ -15,12 +15,8 @@
 (keymap-global-set "C-x C-f" 'helm-find-files)
 (keymap-global-set "C-x b" 'helm-mini)
 
-(setq helm-M-x-fuzzy-match t
-	  helm-buffers-fuzzy-matching t
-	  helm-recentf-fuzzy-match t)
+(custom-set-variables '(helm-M-x-fuzzy-match t)
+					  '(helm-buffers-fuzzy-matching t)
+					  '(helm-recentf-fuzzy-match t))
 
 (helm-mode 1)
-
-;; Projectile with helm
-(straight-use-package 'helm-projectile)
-(helm-projectile-on)

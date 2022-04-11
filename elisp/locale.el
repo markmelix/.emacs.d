@@ -2,7 +2,7 @@
 
 ;; Set default input method after all get initialized
 (add-hook 'after-init-hook (lambda ()
-							 (setq default-input-method "russian-computer")))
+							 (custom-set-variables '(default-input-method "russian-computer"))))
 
 ;;; Platform specific locale configuration
 (cond ((eq system-type 'gnu/linux)

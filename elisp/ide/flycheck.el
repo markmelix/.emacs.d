@@ -11,8 +11,8 @@
 
 (add-hook 'rustic-mode-hook (lambda ()
 							  (flycheck-mode)
-							  (setq flycheck-checker 'rustic-clippy)))
+							  (custom-set-variables '(flycheck-checker 'rustic-clippy))))
 
 (add-hook 'python-mode-hook (lambda ()
 							  (flycheck-mode)
-							  (setq flycheck-checker 'python-pylint)))
+							  (custom-set-variables '(flycheck-checker 'python-pylint))))
