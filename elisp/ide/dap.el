@@ -9,11 +9,11 @@
 (keymap-set lsp-command-map "d" 'dap-hydra)
 (keymap-set prog-mode-map "C-c d" 'dap-hydra)
 
-(setq lsp-enable-dap-auto-configure nil
-	  dap-default-terminal-kind "external"
-	  dap-external-terminal '("alacritty" "-t" "{display}" "-e" "sh" "-c" "{command}")
-	  dap-python-executable "python"
-	  dap-python-debugger 'debugpy)
+(custom-set-variables '(lsp-enable-dap-auto-configure nil)
+					  '(dap-default-terminal-kind "external")
+					  '(dap-external-terminal '("alacritty" "-t" "{display}" "-e" "sh" "-c" "{command}"))
+					  '(dap-python-executable "python")
+					  '(dap-python-debugger 'debugpy))
 
 (require 'dap-node)
 (require 'dap-python)
