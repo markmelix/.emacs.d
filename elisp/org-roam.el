@@ -25,7 +25,7 @@
 
 ;; Beautiful and customizable Zettelkasten notes graph
 (straight-use-package 'org-roam-ui)
-(keymap-global-set "C-c n g" org-roam-ui-mode)
+(keymap-global-set "C-c n g" 'org-roam-ui-mode)
 (custom-set-variables '(org-roam-ui-sync-theme t)
 	  '(org-roam-ui-follow t)
 	  '(org-roam-ui-update-on-save t)

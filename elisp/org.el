@@ -1,8 +1,11 @@
 ;;;; Org mode settings
 
-;; Org Mode
+;;; Org Mode
 (straight-use-package 'org)
 (require 'org)
+
+;; Autocompletion for templates like "<s" for source blocks etc
+(require 'org-tempo)
 
 (keymap-global-set "C-c L" 'org-store-link)
 (keymap-global-set "C-c a" 'org-agenda)
