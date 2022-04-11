@@ -8,10 +8,10 @@
   ;; Truncate buffer for performance
   (add-to-list 'eshell-output-filter-functions 'eshell-truncate-buffer)
 
-  (setq eshell-history-size 10000
-		eshell-buffer-maximum-lines 10000
-		eshell-hist-ignoredups t
-		eshell-scroll-to-bottom-on-input t))
+  (custom-set-variables '(eshell-history-size 10000)
+						'(eshell-buffer-maximum-lines 10000)
+						'(eshell-hist-ignoredups t)
+						'(eshell-scroll-to-bottom-on-input t)))
 
 (add-hook 'eshell-first-time-mode 'my/configure-eshell)
 
