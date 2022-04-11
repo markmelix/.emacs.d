@@ -23,10 +23,14 @@
 
 ;; Solarized Theme
 (straight-use-package 'solarized-theme)
-(setq solarized-use-variable-pitch nil
-	  solarized-scale-org-headlines nil)
-(load-theme 'solarized-dark t)
+(custom-set-variables '(solarized-use-variable-pitch nil)
+ 					  '(solarized-scale-org-headlines nil))
 
-;; Convenient mode line
-(straight-use-package 'telephone-line)
-(telephone-line-mode 1)
+;; Doom themes
+(straight-use-package 'doom-themes)
+(load-theme 'doom-vibrant t)
+
+;; Apply Emacs theme to the rest of Linux, using magic
+(straight-use-package 'theme-magic)
+(require 'theme-magic)
+(theme-magic-export-theme-mode)
