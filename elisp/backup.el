@@ -1,27 +1,38 @@
 ;;; File backup configuration
 
 (custom-set-variables
- '(make-backup-files t "Backup of a file the first time it is saved")
+ ;; Backup of a file the first time it is saved
+ '(make-backup-files t)
 
- '(backup-by-copying t "Don't clobber symlinks")
+ ;; Don't clobber symlinks
+ '(backup-by-copying t)
 
- '(version-control t "Version numbers for backup files")
+ ;; Version numbers for backup files
+ '(version-control t)
 
- '(delete-old-versions t "Delete excess backup files silently")
+ ;; Delete excess backup files silently
+ '(delete-old-versions t)
 
- '(delete-by-moving-to-trash t "Use system trash can")
+ ;; Use system trash can
+ '(delete-by-moving-to-trash t)
 
- '(kept-old-versions 6 "Oldest versions to keep when a new numbered backup is made")
+ ;; Oldest versions to keep when a new numbered backup is made
+ '(kept-old-versions 6)
 
- '(kept-new-versions 9 "Newest versions to keep when a new numbered backup is made")
+ ;; Newest versions to keep when a new numbered backup is made
+ '(kept-new-versions 9)
 
- '(auto-save-default t "Auto-save every buffer that visits a file")
+ ;; Auto-save every buffer that visits a file
+ '(auto-save-default t)
 
- '(auto-save-timeout 20 "Number of seconds idle time before auto-save")
+ ;; Number of seconds idle time before auto-save
+ '(auto-save-timeout 20)
 
- '(auto-save-interval 200 "Number of keystrokes between auto-saves")
+ ;; Number of keystrokes between auto-saves
+ '(auto-save-interval 200)
 
- '(create-lockfiles nil "Don't create lockfiles")
+ ;; Don't create lockfiles
+ '(create-lockfiles nil)
  )
 
 (define-minor-mode sensitive-mode
