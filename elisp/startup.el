@@ -18,6 +18,10 @@
  '(ring-bell-function 'ignore)
  )
 
+;;; Set default shell to bash instead of fish
+(setq shell-file-name "/bin/bash")
+
+
 (defun display-startup-echo-area-message ())
 
 ;;; Package management

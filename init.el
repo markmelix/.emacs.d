@@ -37,5 +37,5 @@ This path is relative to user-emacs-directory.")
 (load-user-file "ide/git.el")
 (load-user-file "ide/lsp.el")
 (load-user-file "ide/autocomplete.el")
-(load-user-file "ide/dap.el")
-
+;(load-user-file "ide/dap.el")
+(load-user-file "ide/flycheck.el")
