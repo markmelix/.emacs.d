@@ -165,7 +165,7 @@ Return t if it is fbound and called without error, and nil otherwise."
 
 ;;; Indentation
 ;; Width of a TAB character on display
-(custom-set-variables '(tab-width 4))
+(setq-default tab-width 4)
 
 ;;; Column beyond which automatic line-wrapping should happen
 (custom-set-variables '(fill-column my/buffer-width))
@@ -183,7 +183,7 @@ Return t if it is fbound and called without error, and nil otherwise."
 ;;; Fill column indicator
 ;; Display long line on the right part of the screen to determine when it's
 ;; time to break a line
-(add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
+;(add-hook 'prog-mode-hook 'display-fill-column-indicator-mode)
 
 ;;; Line numbers
 ;; Display line numbers in the following modes
@@ -239,7 +239,7 @@ Return t if it is fbound and called without error, and nil otherwise."
   :straight t
   :require t
   :bind
-  ("<backspace>" . smart-hungry-delete-backward-char)
+  (:python-mode-map ("<backspace>" . smart-hungry-delete-backward-char))
   ("C-d" . smart-hungry-delete-forward-char)
   :config
   (smart-hungry-delete-add-default-hooks))
@@ -247,11 +247,14 @@ Return t if it is fbound and called without error, and nil otherwise."
 ;;; Drag Stuff is a minor mode for Emacs that makes it possible to drag stuff
 ;;; (words, region, lines) around in Emacs.
 (leaf drag-stuff
+  :disabled t
   :straight t
   :require t
   :bind
   ("M-p" . drag-stuff-up)
   ("M-n" . drag-stuff-down)
+  ("M-<left>" . nil)
+  ("M-<right>" . nil)
   :config
   (drag-stuff-define-keys)
   (drag-stuff-global-mode 1))
@@ -284,8 +287,15 @@ Return t if it is fbound and called without error, and nil otherwise."
 ;; Ask for y/n instead of yes/no
 (defalias 'yes-or-no-p 'y-or-n-p)
 
-;; Deactivate any input method when minibuffer is launched.
-(add-hook 'minibuffer-setup-hook 'deactivate-input-method)
+;; Use main buffer's input method when minibuffer is launched.
+(defun my-inherit-input-method ()
+  "Inherit input method from `minibuffer-selected-window'."
+  (let* ((win (minibuffer-selected-window))
+         (buf (and win (window-buffer win))))
+    (when buf
+      (activate-input-method (buffer-local-value 'current-input-method buf)))))
+
+(add-hook 'minibuffer-setup-hook #'my-inherit-input-method)
 
 ;;; Helm setup
 ;; Framework for incremental completions and narrowing selections
@@ -301,7 +311,11 @@ Return t if it is fbound and called without error, and nil otherwise."
   (helm-buffers-fuzzy-matching . t)
   (helm-recentf-fuzzy-match . t)
   :config
-  (helm-mode 1))
+  (helm-mode 1)
+
+  ;;; Interfaces of The Silver Searcher with helm.
+  (leaf helm-ag
+	:straight t))
 
 ;;;; Emacs Shell configuration
 (leaf eshell
@@ -434,7 +448,7 @@ Return t if it is fbound and called without error, and nil otherwise."
 
 (defun my/font-setup ()
   "Setup fonts"
-  (set-frame-font "Hack Nerd Font 10" t t)
+  (set-frame-font "Hack Nerd Font 11" t t)
 
   ;; Emoji: 😄, 🤦, 🏴󠁧󠁢󠁳󠁣󠁴󠁿
   (set-fontset-font t 'symbol "Apple Color Emoji")
@@ -456,13 +470,6 @@ Return t if it is fbound and called without error, and nil otherwise."
   :config
   (load-theme 'doom-vibrant t))
 
-;; Apply Emacs theme to the rest of Linux, using magic
-(leaf theme-magic
-  :straight t
-  :require t
-  :config
-  (theme-magic-export-theme-mode))
-
 ;;;; Org mode settings
 
 ;;; Org Mode
@@ -477,9 +484,9 @@ Return t if it is fbound and called without error, and nil otherwise."
   :require org org-tempo
   :custom
   (org-directory . "~/Org")
-  (org-hide-leading-stars . nil)
   (org-adapt-indentation . nil)
   (org-element-use-cache . nil)
+  (org-hide-emphasis-markers . t)
   (org-enforce-todo-dependencies . t)
   (org-enforce-todo-checkbox-dependencies . t)
   (org-startup-with-inline-images . t)
@@ -540,39 +547,18 @@ Return t if it is fbound and called without error, and nil otherwise."
 						   "#+title: ${title}\n")
 		:unnarrowed t)))
   :config
-  (org-roam-db-autosync-mode)
-  
-  ;; Beautiful and customizable Zettelkasten notes graph
-  (leaf org-roam-ui
-	:straight t
-	:bind ("C-c n g" . org-roam-ui-mode)
-	:custom
-	(org-roam-ui-sync-theme . t)
-	(org-roam-ui-follow . t)
-	(org-roam-ui-update-on-save . t)
-	(org-roam-ui-open-on-start . t)
-	(org-roam-ui-browser-function . 'browse-url-chromium)))
+  (org-roam-db-autosync-mode))
 
-;;;; Different languages support
-
-;;; Python IDE features
-(leaf elpy
+;; Beautiful and customizable Zettelkasten notes graph
+(leaf org-roam-ui
   :straight t
-  :require t
-  :config
-  (elpy-enable))
-
-(leaf docker
-  :straight t
-  :bind "C-c C-d")
-
-(leaf dockerfile-mode :straight t)
-(leaf docker-compose-mode :straight t)
-(leaf cmake-mode :straight t)
-(leaf fish-mode :straight t)
-(leaf toml-mode :straight t)
-(leaf markdown-mode :straight t)
-(leaf rustic :straight t)
+  :bind ("C-c n g" . org-roam-ui-mode)
+  :custom
+  (org-roam-ui-sync-theme . t)
+  (org-roam-ui-follow . t)
+  (org-roam-ui-update-on-save . t)
+  (org-roam-ui-open-on-start . t)
+  (org-roam-ui-browser-function . 'browse-url-chromium))
 
 ;;;; An incremental parsing system for programming tools
 (leaf tree-sitter
@@ -590,15 +576,17 @@ Return t if it is fbound and called without error, and nil otherwise."
 (leaf projectile
   :straight t
   :require t
-  :bind-keymap ("C-c p" . projectile-command-map)
   :config
-  (projectile-mode 1)
-  
-  ;; Projectile with helm
-  (leaf helm-projectile
-	:straight t
-	:config
-	(helm-projectile-on)))
+  (projectile-mode 1))
+
+;; Projectile with helm
+(leaf helm-projectile
+  :straight t
+  :after projectile
+  :bind-keymap
+  ("C-c p" . projectile-command-map)
+  :config
+  (helm-projectile-on))
 
 ;;;; Git management
 
@@ -645,43 +633,60 @@ Return t if it is fbound and called without error, and nil otherwise."
 
 ;;;; IDE features
 
-;;; Lanuage Server Protocol
-(leaf lsp-mode
+;;;; Different languages support
+
+;;; Python IDE features
+(leaf elpy
   :straight t
   :require t
-  :bind-keymap
-  (:lsp-mode-map
-   ("C-c l" . lsp-command-map))
+  :hook ,(python-mode-hook . '(lambda () (electric-indent-mode -1)))
+  :config
+  (elpy-enable))
+
+(leaf docker
+  :straight t
+  :bind "C-c C-d")
+
+(leaf dockerfile-mode :straight t)
+(leaf docker-compose-mode :straight t)
+(leaf cmake-mode :straight t)
+(leaf fish-mode :straight t)
+(leaf toml-mode :straight t)
+(leaf markdown-mode :straight t)
+
+(leaf lua-mode
+  :straight t
+  :hook (lua-mode-hook . (lambda () (setq indent-tabs-mode nil)))
+  :custom
+  (lua-indent-level . 4))
+
+;;; Rust language support
+(leaf rustic
+  :straight t
   :custom
   (lsp-eldoc-hook . nil)
-  (lsp-eldoc-render-all . nil)
-  (lsp-eldoc-enable-hover . nil)
   (lsp-enable-symbol-highlighting . nil)
-  (lsp-idle-delay . 0.6)
-  (lsp-rust-analyzer-cargo-watch-command . "clippy")
-  (lsp-rust-analyzer-server-display-inlay-hints . t)
-  (lsp-rust-analyzer-display-lifetime-elision-hints-enable . "skip_trivial")
-  (lsp-rust-analyzer-display-chaining-hints . t)
-  (lsp-rust-analyzer-display-lifetime-elision-hints-use-parameter-names . nil)
-  (lsp-rust-analyzer-display-closure-return-type-hints . t)
-  (lsp-rust-analyzer-display-parameter-hints . nil)
-  (lsp-rust-analyzer-display-reborrow-hints . nil)
+  (lsp-signature-auto-activate . t))
+
+;;; Real-time error checking
+(leaf flycheck
+  :straight t
+  :require t
   :config
-  (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]\\prod\\'")
-  (lsp-enable-which-key-integration t)
-  
-  (cl-defgeneric lsp-clients-extract-signature-on-hover (contents _server-id)
-	"Extract a representative line from CONTENTS, to show in the echo area."
-	(nth 1 (s-split "\n\n" (lsp--render-element contents))))
+  (add-to-list 'flycheck-checkers 'rustic-clippy)
+  (add-hook 'rustic-mode-hook (lambda ()
+								(setq flycheck-checker 'rustic-clippy))))
 
-  (leaf lsp-treemacs
-	:straight t
-	:bind
-	(:lsp-command-map
-	 ("s" . lsp-treemacs-symbols))))
+;;; Snippets implementation
+(leaf yasnippet
+  :straight t
+  :require t
+  :hook (prog-mode-hook . yas-minor-mode)
+  :config
+  (leaf yasnippet-snippets
+	:straight))
 
-
-;;; Autocompletion or snippet choose while typing code
+;;; Autocompletion
 (leaf company
   :straight t
   :require t
@@ -706,21 +711,48 @@ Return t if it is fbound and called without error, and nil otherwise."
 	(company-prescient-mode 1)
 	(prescient-persist-mode 1)))
 
-;;; Snippets implementation
-(leaf yasnippet
+;;; Lanuage Server Protocol
+(leaf lsp-mode
   :straight t
   :require t
-  :hook (prog-mode-hook . yas-minor-mode)
+  :hook
+  (lsp-mode-hook . lsp-enable-which-key-integration)
+  :custom
+  (lsp-rust-analyzer-cargo-watch-command . "clippy")
+  (lsp-eldoc-render-all . t)
+  (lsp-lens-enable . nil)
+  (lsp-modeline-diagnostics-scope . :file)
+  (lsp-modeline-code-actions-enable . nil)
+  (lsp-headerline-breadcrumb-enable . nil)
+  (lsp-enable-on-type-formatting . nil)
+  (lsp-diagnostic-package . :none)
+  (lsp-rust-analyzer-diagnostics-enable . nil)
+  (lsp-rust-full-docs . t)
+  (lsp-rust-clippy-preference . "on")
   :config
-  (leaf yasnippet-snippets
-	:straight))
+  (add-to-list 'lsp-file-watch-ignored-directories "[/\\\\]\\prod\\'")
+  ;; (cl-defgeneric lsp-clients-extract-signature-on-hover (contents _server-id)
+  ;; 	"Extract a representative line from CONTENTS, to show in the echo area."
+  ;; 	(nth 1 (s-split "\n\n" (lsp--render-element contents))))
+  
+  (leaf lsp-treemacs
+	:straight t
+	:require t
+	:bind
+	(:lsp-command-map
+	 ("s" . lsp-treemacs-symbols)
+	 ("e" . lsp-treemacs-error-list))))
 
-;;; Real-time error checking
-(leaf flycheck
+(leaf lsp-ui
   :straight t
   :require t
+  :bind-keymap
+  (:lsp-mode-map
+   ("C-c l" . lsp-command-map))
+  :commands lsp-ui-mode
   :config
-  (add-to-list 'flycheck-checkers 'rustic-clippy))
+  (define-key lsp-ui-mode-map [remap xref-find-definitions] #'lsp-ui-peek-find-definitions)
+  (define-key lsp-ui-mode-map [remap xref-find-references] #'lsp-ui-peek-find-references))
 
 ;;; Debugging features
 (leaf dap-mode
@@ -728,8 +760,8 @@ Return t if it is fbound and called without error, and nil otherwise."
   :require dap-python dap-gdb-lldb
   :hook rust-mode-hook python-mode-hook
   :bind
-  (:lsp-command-map
-   ("d" . dap-hydra))
+  ;; (:lsp-command-map
+  ;;  ("d" . dap-hydra))
   (:prog-mode-map
    ("C-c d" . dap-hydra))
   :custom
